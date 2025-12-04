@@ -1,0 +1,7 @@
+venv/
+front/venv/
+__pycache__/
+*.pyc
+*.pyo
+.dvc/tmp/
+models/

@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  tfidf-api:
+    build: ./tf-idf
+    container_name: tfidf-api
+    ports:
+      - "5000:5000"
+    networks:
+      - ai-net
+
+  transformer-api:
+    build: ./transformer
+    container_name: transformer-api
+    ports:
+      - "8000:8000"
+    networks:
+      - ai-net
+
+  agent:
+    build: ./agent
+    container_name: agent
+    ports:
+      - "6000:6000"
+    environment:
+      - LOG_LEVEL=info
+      - DEBUG=false
+    depends_on:
+      - tfidf-api
+      - transformer-api
+    networks:
+      - ai-net
+
+  # Optional later (Phase 4 & 5)
+  # mlflow:
+  # prometheus:
+  # grafana:
+
+networks:
+  ai-net:
+    driver: bridge
