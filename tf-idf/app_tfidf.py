@@ -3,8 +3,7 @@ import time
 import joblib
 from fastapi import FastAPI
 from fastapi.responses import Response
-from prometheus_client import (CONTENT_TYPE_LATEST, Counter, Histogram,
-                               generate_latest)
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
 model = joblib.load("models/tfidf/model_tfidf_svm.pkl")
