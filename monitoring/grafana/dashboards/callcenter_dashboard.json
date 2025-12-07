@@ -1,54 +1,183 @@
 {
-  "dashboard": {
-    "title": "CallCenterAI - Service Metrics",
-    "tags": ["callcenterai", "ml", "monitoring"],
-    "timezone": "browser",
-    "panels": [
-      {
-        "id": 1,
-        "title": "Total Requests per Service",
-        "type": "graph",
-        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
-        "targets": [
-          {
-            "expr": "rate(transformer_predictions_total[1m])",
-            "legendFormat": "Transformer"
-          },
-          {
-            "expr": "rate(tfidf_predictions_total[1m])",
-            "legendFormat": "TF-IDF"
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "title": "Average Response Time",
-        "type": "graph",
-        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
-        "targets": [
-          {
-            "expr": "rate(transformer_prediction_latency_seconds_sum[1m]) / rate(transformer_prediction_latency_seconds_count[1m])",
-            "legendFormat": "Transformer"
-          },
-          {
-            "expr": "rate(tfidf_prediction_latency_seconds_sum[1m]) / rate(tfidf_prediction_latency_seconds_count[1m])",
-            "legendFormat": "TF-IDF"
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "title": "Requests per Second",
-        "type": "stat",
-        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 4},
-        "targets": [
-          {
-            "expr": "sum(rate(transformer_predictions_total[1m]))"
-          }
-        ]
-      }
+  "id": null,
+  "uid": "callcenter-ai",
+  "title": "CallCenterAI - Monitoring Dashboard",
+  "tags": ["callcenterai", "mlops", "monitoring"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+
+  "timepicker": {
+    "refresh_intervals": [
+      "5s", "10s", "30s", "1m", "5m", "15m"
     ],
-    "refresh": "5s",
-    "time": {"from": "now-1h", "to": "now"}
-  }
+    "quick_ranges": [
+      { "from": "now-1h", "to": "now", "display": "Last 1 hour" },
+      { "from": "now-6h", "to": "now", "display": "Last 6 hours" },
+      { "from": "now-24h", "to": "now", "display": "Last 24 hours" }
+    ],
+    "now": true,
+    "type": "timepicker"
+  },
+
+  "templating": {
+    "list": []
+  },
+
+  "annotations": {
+    "list": []
+  },
+
+  "links": [],
+
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "version": 1,
+
+  "panels": [
+    {
+      "type": "row",
+      "title": "⚙️ System Overview",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total Requests (All Services)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(tfidf_predictions_total) + sum(transformer_predictions_total) + sum(agent_requests_total)"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 4 }
+    },
+
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Agent Errors",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(agent_requests_total{status=\"error\"})" }
+      ],
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 4 }
+    },
+
+    {
+      "type": "row",
+      "title": "📡 TF-IDF Service",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
+    },
+
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "TF-IDF Request Count",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(increase(tfidf_predictions_total[1m]))" }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 7 }
+    },
+
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "TF-IDF Latency p95",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(tfidf_prediction_latency_seconds_bucket[2m])) by (le))" }
+      ],
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 7 }
+    },
+
+    {
+      "type": "row",
+      "title": "🤖 Transformer Service",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 1 }
+    },
+
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Transformer Request Count",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(increase(transformer_predictions_total[1m]))" }
+      ],
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 7 }
+    },
+
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Transformer Latency p95",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(transformer_prediction_latency_seconds_bucket[2m])) by (le))" }
+      ],
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 7 }
+    },
+
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Transformer Model Usage",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "increase(transformer_model_usage[5m])" }
+      ],
+      "gridPos": { "x": 0, "y": 35, "w": 24, "h": 7 }
+    },
+
+    {
+      "type": "row",
+      "title": "🧠 Agent Service",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 42, "w": 24, "h": 1 }
+    },
+
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Agent Routing Decisions",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "increase(agent_routing_decisions_total[2m])" }
+      ],
+      "gridPos": { "x": 0, "y": 43, "w": 24, "h": 7 }
+    },
+
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Agent PII Detections",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "increase(agent_pii_detected_total[5m])" }
+      ],
+      "gridPos": { "x": 0, "y": 50, "w": 24, "h": 7 }
+    },
+
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Agent Latency p95",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(agent_prediction_latency_seconds_bucket[2m])) by (le))" }
+      ],
+      "gridPos": { "x": 0, "y": 57, "w": 24, "h": 7 }
+    }
+  ]
 }

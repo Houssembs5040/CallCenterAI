@@ -1,0 +1,154 @@
+/* -------- GLOBAL RESET -------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    
+    /* REMOVE overflow hidden so scrolling works */
+    overflow: hidden;
+
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* -------- HEADER -------- */
+.header {
+    background: #161b22;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-bottom: 1px solid #30363d;
+    flex-shrink: 0; /* prevent header from collapsing */
+}
+
+.header img {
+    width: 28px;
+    filter: invert(88%);
+}
+
+/* -------- CHAT CONTAINER -------- */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+
+    /* THIS FIXES EVERYTHING → chat-container takes the remaining height */
+    flex: 1;
+    min-height: 0;    /* IMPORTANT FIX */
+    padding: 15px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* -------- CHAT BOX (SCROLLABLE AREA) -------- */
+.chat-box {
+    flex: 1;
+    min-height: 0;  /* VERY IMPORTANT for scrolling inside flexbox */
+
+    overflow-y: auto;  /* INTERNAL SCROLL FIX */
+    padding: 20px;
+
+    background: #0d1117;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    border: 1px solid #30363d;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.35) inset;
+}
+
+/* CUSTOM SCROLLBAR */
+.chat-box::-webkit-scrollbar { width: 10px; }
+.chat-box::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 10px;
+}
+.chat-box::-webkit-scrollbar-track {
+    background: #161b22;
+}
+
+/* -------- MESSAGE BUBBLES -------- */
+.message {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    line-height: 1.45;
+    font-size: 15px;
+    animation: fadeIn 0.2s ease;
+    white-space: pre-wrap;
+}
+
+.user {
+    align-self: flex-end;
+    background: #238636;
+    color: white;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 0 8px rgba(35, 134, 54, 0.5);
+}
+
+.assistant {
+    align-self: flex-start;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.05);
+}
+
+/* -------- TYPING INDICATOR -------- */
+.typing {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* -------- INPUT AREA -------- */
+.input-area {
+    margin-top: 15px;
+    display: flex;
+    flex-shrink: 0; /* keep input bar visible */
+
+    background: #161b22;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    background: #0d1117;
+    color: #e6edf3;
+    font-size: 16px;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    outline: none;
+}
+
+button {
+    margin-left: 10px;
+    padding: 12px 22px;
+    font-size: 16px;
+    background: #238636;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+button:hover { background: #1f7a31; }
+
+/* -------- ANIMATIONS -------- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}

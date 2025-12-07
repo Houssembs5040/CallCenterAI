@@ -3,7 +3,7 @@ import requests
 import time
 import random
 
-API_URL = "http://localhost:8080/predict"
+API_URL = "http://localhost:6000/predict"
 
 test_tickets = [
     "My laptop screen is broken and needs repair",
