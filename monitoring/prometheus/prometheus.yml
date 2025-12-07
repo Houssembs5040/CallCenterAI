@@ -1,0 +1,46 @@
+# Prometheus Configuration for CallCenterAI
+
+global:
+  scrape_interval: 15s      # Scrape targets every 15 seconds
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+  external_labels:
+    monitor: 'callcenterai-monitor'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # Transformer Service (YOUR PORT: 8000)
+  - job_name: 'transformer-service'
+    static_configs:
+      - targets: ['transformer-api:8000']
+        labels:
+          service: 'transformer'
+          team: 'ml-team'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # TF-IDF Service (YOUR PORT: 5000)
+  - job_name: 'tfidf-service'
+    static_configs:
+      - targets: ['tfidf-api:5000']
+        labels:
+          service: 'tfidf'
+          team: 'ml-team'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Agent Service (YOUR PORT: 6000)
+  - job_name: 'agent-service'
+    static_configs:
+      - targets: ['agent:6000']
+        labels:
+          service: 'agent'
+          team: 'ml-team'
+    metrics_path: '/metrics'
+    scrape_interval: 10s

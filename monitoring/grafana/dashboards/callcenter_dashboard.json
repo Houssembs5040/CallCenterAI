@@ -1,0 +1,54 @@
+{
+  "dashboard": {
+    "title": "CallCenterAI - Service Metrics",
+    "tags": ["callcenterai", "ml", "monitoring"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Requests per Service",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(transformer_predictions_total[1m])",
+            "legendFormat": "Transformer"
+          },
+          {
+            "expr": "rate(tfidf_predictions_total[1m])",
+            "legendFormat": "TF-IDF"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Average Response Time",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(transformer_prediction_latency_seconds_sum[1m]) / rate(transformer_prediction_latency_seconds_count[1m])",
+            "legendFormat": "Transformer"
+          },
+          {
+            "expr": "rate(tfidf_prediction_latency_seconds_sum[1m]) / rate(tfidf_prediction_latency_seconds_count[1m])",
+            "legendFormat": "TF-IDF"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Requests per Second",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(transformer_predictions_total[1m]))"
+          }
+        ]
+      }
+    ],
+    "refresh": "5s",
+    "time": {"from": "now-1h", "to": "now"}
+  }
+}

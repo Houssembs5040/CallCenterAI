@@ -6,14 +6,16 @@ Simple FastAPI service for ticket classification
 import importlib.util
 import os
 import sys
+import time
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
+from prometheus_client import Counter, Histogram, generate_latest, REGISTRY, CONTENT_TYPE_LATEST
 
 # Add project root to path so we can import our modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
 
 spec = importlib.util.spec_from_file_location(
     "transformer_predictor", "models/transformer_predictor.py"
@@ -21,6 +23,28 @@ spec = importlib.util.spec_from_file_location(
 predictor_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(predictor_module)
 TransformerPredictor = predictor_module.TransformerPredictor
+
+# ============================================
+# Prometheus Metrics
+# ============================================
+prediction_counter = Counter(
+    'transformer_predictions_total',
+    'Total number of predictions',
+    ['status']
+)
+
+prediction_latency = Histogram(
+    'transformer_prediction_latency_seconds',
+    'Prediction latency in seconds',
+    buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+)
+
+model_usage = Counter(
+    'transformer_model_usage',
+    'Model usage counter',
+    ['model_type']
+)
+
 # ============================================
 # Initialize FastAPI App
 # ============================================
@@ -97,7 +121,6 @@ class PredictionResponse(BaseModel):
 # API Endpoints
 # ============================================
 
-
 @app.get("/")
 def root():
     """
@@ -132,34 +155,39 @@ def health():
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest):
     """
-        Predict ticket category
+    Predict ticket category
 
-        Example request:
-    ```json
-        {
-            "text": "My laptop is broken",
-            "return_probas": true
-        }
-    ```
+    Example request:
+```json
+    {
+        "text": "My laptop is broken",
+        "return_probas": true
+    }
+```
 
-        Example response:
-    ```json
-        {
-            "text": "My laptop is broken",
-            "category": "Hardware",
-            "confidence": 0.98,
-            "model": "distilbert-multilingual"
-        }
-    ```
+    Example response:
+```json
+    {
+        "text": "My laptop is broken",
+        "category": "Hardware",
+        "confidence": 0.98,
+        "model": "distilbert-multilingual"
+    }
+```
     """
+    # Start timing
+    start_time = time.time()
+    
     # Check if model is loaded
     if predictor is None:
+        prediction_counter.labels(status='error').inc()
         raise HTTPException(
             status_code=500, detail="Model not loaded. Please check server logs."
         )
 
     # Validate input
     if not request.text or len(request.text.strip()) == 0:
+        prediction_counter.labels(status='error').inc()
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
     try:
@@ -169,9 +197,16 @@ def predict(request: PredictionRequest):
         # Add model info
         result["model"] = "distilbert-multilingual"
 
+        # Record metrics
+        latency = time.time() - start_time
+        prediction_latency.observe(latency)
+        prediction_counter.labels(status='success').inc()
+        model_usage.labels(model_type='transformer').inc()
+
         return result
 
     except Exception as e:
+        prediction_counter.labels(status='error').inc()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
@@ -187,6 +222,15 @@ def get_categories():
     categories = list(predictor.label_encoder.classes_)
 
     return {"categories": categories, "total": len(categories)}
+
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus metrics endpoint"""
+    return Response(
+        content=generate_latest(REGISTRY),
+        media_type=CONTENT_TYPE_LATEST
+    )
 
 
 # ============================================
