@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install dvc[s3]
 
 # Pull model from DVC storage
-RUN dvc pull -f
+COPY models/tfidf/ ./models/tfidf/
 
 EXPOSE 5000
 CMD ["uvicorn", "app_tfidf:app", "--host", "0.0.0.0", "--port", "5000"]

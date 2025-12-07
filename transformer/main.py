@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 spec = importlib.util.spec_from_file_location(
-    "transformer_predictor", "src/models/transformer_predictor.py"
+    "transformer_predictor", "models/transformer_predictor.py"
 )
 predictor_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(predictor_module)

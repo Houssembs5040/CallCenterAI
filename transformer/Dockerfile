@@ -35,6 +35,7 @@ COPY . ./api/transformer_service/
 # Copy models (this will be large ~500MB)
 COPY model/transformer/ ./models/transformer/
 
+COPY model/transformer_predictor.py ./models/
 # ============================================
 # Stage 4: Configuration
 # ============================================
