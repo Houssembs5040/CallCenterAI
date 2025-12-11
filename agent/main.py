@@ -9,9 +9,8 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, Response
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 
 # --------------------------------------------
 # Prometheus Metrics
@@ -20,7 +19,6 @@ from prometheus_client import (
     CONTENT_TYPE_LATEST,
     REGISTRY,
     Counter,
-    Gauge,
     Histogram,
     generate_latest,
 )
