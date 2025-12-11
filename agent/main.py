@@ -12,46 +12,46 @@ import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel
 
 # --------------------------------------------
 # Prometheus Metrics
 # --------------------------------------------
 from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-    generate_latest,
     CONTENT_TYPE_LATEST,
     REGISTRY,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
 )
+from pydantic import BaseModel
 
 # Total prediction requests handled by the agent
 AGENT_REQUEST_COUNT = Counter(
     "agent_requests_total",
     "Total number of prediction requests processed by the agent",
-    ["status"]
+    ["status"],
 )
 
 # Routing decisions (TF-IDF vs Transformer)
 AGENT_ROUTING_DECISIONS = Counter(
     "agent_routing_decisions_total",
     "Total routing decisions made by the agent",
-    ["model"]
+    ["model"],
 )
 
 # Latency for agent decision + upstream call
 AGENT_LATENCY = Histogram(
     "agent_prediction_latency_seconds",
     "End-to-end prediction latency for the agent in seconds",
-    buckets=[0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5]
+    buckets=[0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5],
 )
 
 # PII detection counters
 AGENT_PII_DETECTED = Counter(
     "agent_pii_detected_total",
     "Total PII occurrences detected and scrubbed by the agent",
-    ["pii_type"]
+    ["pii_type"],
 )
 
 # ============================================
@@ -68,6 +68,7 @@ app = FastAPI(
 # ============================================
 TRANSFORMER_SERVICE = "http://transformer-api:8000"
 TFIDF_SERVICE = "http://tfidf-api:5000"
+
 
 # ============================================
 # Logging
@@ -172,7 +173,9 @@ def analyze_text(text: str) -> Dict[str, Any]:
         "avg_word_length": (sum(len(w) for w in words) / len(words)) if words else 0,
         "has_special_chars": bool(re.search(r"[^\x00-\x7F]", text)),
         "has_numbers": bool(re.search(r"\d", text)),
-        "uppercase_ratio": (sum(1 for c in text if c.isupper()) / len(text)) if text else 0,
+        "uppercase_ratio": (
+            (sum(1 for c in text if c.isupper()) / len(text)) if text else 0
+        ),
         "sentence_count": len([s for s in re.split(r"[.!?]+", text) if s.strip()]),
     }
 
@@ -300,4 +303,5 @@ async def predict(request: TicketRequest):
 # ============================================
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=6000)

@@ -1,17 +1,20 @@
 import requests
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder="static")
 
 BACKEND_URL = "http://localhost:6000/predict"
 
+
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
 
+
 @app.route("/<path:path>")
 def static_files(path):
     return send_from_directory("static", path)
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -21,6 +24,7 @@ def predict():
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"error": str(e)})
+
 
 if __name__ == "__main__":
     app.run(port=3020, debug=True)
